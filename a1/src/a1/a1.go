@@ -1,7 +1,12 @@
 package a1
 
-import "math"
-// import "fmt"
+import (
+	"math"
+	"strings"
+	"fmt"
+	"io/ioutil"
+)
+
 func isPrime(x int) bool{
 	if x < 2{
 		return false
@@ -26,10 +31,24 @@ func countPrimes(n int) int{
 	}
 	return count
 }
-// func main() {  
-//     if isPrime(5){
-// 		fmt.Print("Yes")
-// 	}else{
-// 		fmt.Print("No")
-// 	}
-// }
+
+func countStrings(filename string) map[string]int{
+	filename = strings.TrimSpace(filename)
+	content, err := ioutil.ReadFile(filename) // read the file
+    if err != nil {
+        fmt.Print(err)
+		return nil
+    }
+	var words = strings.Fields(string(content))
+	dict := make(map[string]int)
+	for _, element := range words {
+		if val, ok := dict[element]; ok {
+			// word already exist, doing increment
+			dict[element] = val+1
+		}else{
+			// word do not exist, init with one
+			dict[element] = 1
+		}
+	}
+	return dict
+}

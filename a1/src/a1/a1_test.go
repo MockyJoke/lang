@@ -2,6 +2,7 @@ package a1
 
 import "testing"
 import "fmt"
+import "reflect"
 
 func TestCountPrimes(t *testing.T) {
 	// test stuff here...
@@ -56,6 +57,18 @@ func TestIsPrime(t *testing.T) {
 		error = true
 	}
 	if error{
+		t.Error("Failed")
+	}
+}
+
+func TestCountStrings(t *testing.T) {
+	var dict map[string]int = countStrings("test.txt")
+	var target map[string]int =map[string]int {"The":1, "the":1, "big":3, "dog":1, "ate":1, "apple":1}
+	result := reflect.DeepEqual(dict, target)
+	if !result {
+		fmt.Println("Result mapping incorrect")
+		fmt.Printf("Result: %v\n", dict)
+		fmt.Printf("Target: %v\n", target)
 		t.Error("Failed")
 	}
 }
