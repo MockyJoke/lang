@@ -164,3 +164,27 @@ func TestMinTime24(t *testing.T){
 	}
 }
 
+func TestLinearSearch(t *testing.T){
+	var error bool = false
+
+	if linearSearch(5, []int{4, 2, -1, 5, 0})!=3{
+		fmt.Println("Test case #1 failed")
+		error = true
+	}
+	if linearSearch(3, []int{4, 2, -1, 5, 0})!=-1{
+		fmt.Println("Test case #2 failed")
+		error = true
+	}
+	if linearSearch("egg", []string{"cat", "nose", "egg"})!=2{
+		fmt.Println("Test case #3 failed")
+		error = true
+	}
+	if linearSearch("up", []string{"cat", "nose", "egg"})!=-1{
+		fmt.Println("Test case #4 failed")
+		error = true
+	}
+
+	if error{
+		t.Error("Failed")
+	}
+}

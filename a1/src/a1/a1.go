@@ -108,3 +108,43 @@ func minTime24(times []Time24) (Time24, error){
 	}
 	return times[minIndex],nil
 }
+
+func linearSearch(x interface{}, lst interface{}) int{
+	switch tpe := x.(type) {
+		case int:
+			slice, ok := lst.([]int)
+			if !ok{
+				panic("lst is not []int type.")
+			}
+			for i, element := range slice {
+				if element == x.(int){
+					return i
+				}
+			}	
+		case string:
+			slice, ok := lst.([]string)
+			if !ok{
+				panic("lst is not []string type.")
+			}
+			for i, element := range slice {
+				if element == x.(string){
+					return i
+				}
+			}
+		default:
+			var str = fmt.Sprintf("Unsupported type: %T\n", tpe)
+			panic(str)
+	}
+	return -1
+}
+
+// func (num int) String() string {
+// 	var str = fmt.Sprintf("%d:%02d:%02d",num)
+// 	return str;
+// }
+// func (str string) String() string {
+// 	return str;
+// }
+	
+type Comparable interface {
+}
