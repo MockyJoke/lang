@@ -188,3 +188,26 @@ func TestLinearSearch(t *testing.T){
 		t.Error("Failed")
 	}
 }
+
+func TestAllBitSeqs(t *testing.T){
+	fmt.Println(allBitSeqs(3))
+	var error bool = false
+	var r1=allBitSeqs(1)
+	if len(r1)!=2 {
+		fmt.Println("Test case #1 failed")
+		error = true
+	}
+	var r2=allBitSeqs(2)
+	if len(r2)!=4 {
+		fmt.Println("Test case #2 failed")
+		error = true
+	}
+	var r3=allBitSeqs(3)
+	if len(r3)!=8 {
+		fmt.Println("Test case #3 failed")
+		error = true
+	}
+	if error{
+		t.Error("Failed")
+	}
+}

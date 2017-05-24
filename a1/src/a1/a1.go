@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"errors"
+	"strconv"
 )
 
 func isPrime(x int) bool{
@@ -138,13 +139,30 @@ func linearSearch(x interface{}, lst interface{}) int{
 	return -1
 }
 
-// func (num int) String() string {
-// 	var str = fmt.Sprintf("%d:%02d:%02d",num)
-// 	return str;
-// }
-// func (str string) String() string {
-// 	return str;
-// }
-	
-type Comparable interface {
+func allBitSeqs(n int) [][]int{
+	if n<=0 {
+		return [][]int{}
+	}
+	n = int(math.Pow(2,float64(n)))-1
+	var result [][]int = [][]int{}
+	var binLength = len(strconv.FormatInt(int64(n), 2))
+
+	for i := 0; i <= n; i++ {
+		var binSlice []int = []int{}
+		
+		var binStr = strconv.FormatInt(int64(i), 2)
+		if(len(binStr)<binLength){
+			var fmtStr = "%0"+strconv.Itoa(binLength-len(binStr))+"d"
+			var zeroPads = fmt.Sprintf(fmtStr, 0)
+			binStr = zeroPads + binStr
+		}
+		for _,char := range(binStr){
+			digit, _ := strconv.Atoi(string(char))
+			binSlice = append(binSlice,digit)
+		}
+		//fmt.Println(binSlice)
+		result = append(result,binSlice)
+	}
+	//fmt.Println(result)
+	return result
 }
