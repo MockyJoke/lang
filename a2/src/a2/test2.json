@@ -1,5 +1,8 @@
 {
     "title": "example glossary",
+    "title2": "example glossary",
+    "title3": "example glossary",
+    "title4": "example glossary",
     "GlossDiv": {
         "test": "SGML"
     }
