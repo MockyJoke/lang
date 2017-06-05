@@ -20,7 +20,7 @@ func parseJson(filename string) string {
 	filename = strings.TrimSpace(filename)
 	content, err := ioutil.ReadFile(filename) // read the file
 	if err != nil {
-        fmt.Print(err)
+        fmt.Println(err)
 		return "Error, unable to read file"
     }
 	jsonString := string(content)
