@@ -1,42 +1,49 @@
-package a2
+package main
 
 import (
 	// "math"
 	"strings"
 	"fmt"
 	"io/ioutil"
+	"os"
 	// "errors"
 	// "strconv"
 )
-
-func parseJson(filename string) bool {
+func main(){
+	fileName := os.Args[1]
+	if fileName==""{
+		fmt.Print("No proper input json supplied.")
+	}
+	fmt.Println(parseJson(fileName))
+}
+func parseJson(filename string) string {
 	filename = strings.TrimSpace(filename)
 	content, err := ioutil.ReadFile(filename) // read the file
 	if err != nil {
         fmt.Print(err)
-		return false
+		return "Error, unable to read file"
     }
 	jsonString := string(content)
+	if len(jsonString)==0{
+		return ""
+	}
 	token, _ := parseToken(jsonString)
-	fmt.Print(getTokenContent(token))
-
-	// fmt.Println(len(test))	
-	
-	return true
+	json := getTokenContent(token,0)
+	return json
 }
-func getTokenContent(token IJsonToken)string{
+
+func getTokenContent(token IJsonToken,depth int)string{
 	var buffer string = ""
 	container,ok := token.(IContainer)
 	if ok{
 		childs := container.GetChilds()
-		//fmt.Printf("Found container, got %v childs.\n",len(childs))
 		containerSigns := "{}"
 		if(token.GetTypeString()=="Array"){
 			containerSigns="[]"
 		}
 		buffer =buffer +string(containerSigns[0])+"\n"
 		for i,ele := range childs{
-			buffer =buffer + getTokenContent(ele)
+			buffer =buffer + getTokenContent(ele,depth+1)
 			if i<len(childs)-1{
 				buffer +=","
 			}
@@ -48,7 +55,7 @@ func getTokenContent(token IJsonToken)string{
 	switch token.(type) {
 		case Pair:
 			pair,_ := token.(Pair)
-			buffer = buffer +"\"" +pair.Key.stringContent +"\":" +getTokenContent(pair.Val)
+			buffer = buffer +"\"" +pair.Key.stringContent +"\":" +getTokenContent(pair.Val, depth+1)
 		case String:
 			str,_ := token.(String)
 			buffer = buffer +"\"" +str.stringContent +"\""
@@ -70,12 +77,7 @@ func parseToken(text string) (IJsonToken,int){
 	var buffer string = ""
 	for i < len(text) {
 		char := string(text[i])
-		//container,_ :=currentToken.(*Object)
-		//fmt.Printf("At:(%v)current %v childs.\n",char,len(container.Members))
 		if char == "}" ||char == "]"{
-			fmt.Println("Token:")
-			fmt.Println(buffer)
-			fmt.Println("------------------------------------------------------------------------------------------------------------------------------------------------------------------------------")
 			parseUnknown(buffer, tokenPool, currentToken)
 			i++
 			break
@@ -118,7 +120,6 @@ func createNewToken(char string) IJsonToken{
 	if char == "{"{
 		token = &Object{}
 	}else if char == "["{
-		fmt.Println("yoyo")
 		token = &Array{}
 	}else if char =="\""{
 		token = &String{}
@@ -204,7 +205,6 @@ type Array struct{
 	Elements []IJsonToken
 }
 func (arr *Array)AddChild(child IJsonToken){
-	fmt.Println("gagadsd")
 	arr.Elements = append(arr.Elements, child)
 }
 func (arr *Array)GetTypeString() string {
