@@ -1,14 +1,12 @@
 package main
 
 import (
-	// "math"
 	"strings"
 	"fmt"
 	"io/ioutil"
 	"os"
-	// "errors"
-	// "strconv"
 )
+
 func main(){
 	fileName := os.Args[1]
 	if fileName==""{
@@ -16,6 +14,7 @@ func main(){
 	}
 	fmt.Println(parseJson(fileName))
 }
+
 func parseJson(filename string) string {
 	filename = strings.TrimSpace(filename)
 	content, err := ioutil.ReadFile(filename) // read the file
@@ -29,10 +28,25 @@ func parseJson(filename string) string {
 	}
 	token, _ := parseToken(jsonString)
 	json := getTokenContent(token,0)
+	//json := getTokenHtml(token, 0)
 	return json
 }
 
-func getTokenContent(token IJsonToken,depth int)string{
+func getTokenHtml(token IJsonToken, depth int)string{
+var indentChar =" "
+	var indent string =""
+	var endingIndent = ""
+	i := 0
+	for i <= depth{
+		indent += indentChar
+		i++
+	}
+	i = 0
+	for i < depth{
+		endingIndent += indentChar
+		i++
+	}
+	
 	var buffer string = ""
 	container,ok := token.(IContainer)
 	if ok{
@@ -43,25 +57,74 @@ func getTokenContent(token IJsonToken,depth int)string{
 		}
 		buffer =buffer +string(containerSigns[0])+"\n"
 		for i,ele := range childs{
-			buffer =buffer + getTokenContent(ele,depth+1)
+			buffer =buffer+ getTokenContent(ele,depth+1)
 			if i<len(childs)-1{
 				buffer +=","
 			}
 			buffer +="\n"
 		}
-		buffer =buffer +string(containerSigns[1])+""
+		buffer =buffer +endingIndent+string(containerSigns[1])+""
+		return buffer
 	}
 	
 	switch token.(type) {
 		case Pair:
 			pair,_ := token.(Pair)
-			buffer = buffer +"\"" +pair.Key.stringContent +"\":" +getTokenContent(pair.Val, depth+1)
+			buffer = buffer +indent+"\""+pair.Key.stringContent +"\":" +strings.TrimLeft(getTokenContent(pair.Val, depth+1),indentChar)
 		case String:
 			str,_ := token.(String)
-			buffer = buffer +"\"" +str.stringContent +"\""
+			buffer = buffer+indent+"\"" +str.stringContent +"\""
 		case Unknown:
 			str,_ := token.(Unknown)
-			buffer = buffer +" " +str.Content +" "
+			buffer = buffer + indent +" " +str.Content +" "
+	}
+	return buffer
+}
+func getTokenContent(token IJsonToken,depth int)string{
+	var indentChar =" "
+	var indent string =""
+	var endingIndent = ""
+	i := 0
+	for i <= depth{
+		indent += indentChar
+		i++
+	}
+	i = 0
+	for i < depth{
+		endingIndent += indentChar
+		i++
+	}
+	
+	var buffer string = ""
+	container,ok := token.(IContainer)
+	if ok{
+		childs := container.GetChilds()
+		containerSigns := "{}"
+		if(token.GetTypeString()=="Array"){
+			containerSigns="[]"
+		}
+		buffer =buffer +string(containerSigns[0])+"\n"
+		for i,ele := range childs{
+			buffer =buffer+ getTokenContent(ele,depth+1)
+			if i<len(childs)-1{
+				buffer +=","
+			}
+			buffer +="\n"
+		}
+		buffer =buffer +endingIndent+string(containerSigns[1])+""
+		return buffer
+	}
+	
+	switch token.(type) {
+		case Pair:
+			pair,_ := token.(Pair)
+			buffer = buffer +indent+"\""+pair.Key.stringContent +"\":" +strings.TrimLeft(getTokenContent(pair.Val, depth+1),indentChar)
+		case String:
+			str,_ := token.(String)
+			buffer = buffer+indent+"\"" +str.stringContent +"\""
+		case Unknown:
+			str,_ := token.(Unknown)
+			buffer = buffer + indent +" " +str.Content +" "
 	}
 	return buffer
 }
