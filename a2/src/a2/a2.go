@@ -49,10 +49,11 @@ func getTokenContent(token IJsonToken)string{
 		for i,ele := range childs{
 			buffer =buffer + getTokenContent(ele)
 			if i<len(childs)-1{
-				buffer +=",\n"
+				buffer +=","
 			}
+			buffer +="\n"
 		}
-		buffer =buffer +string(containerSigns[1])+"\n"
+		buffer =buffer +string(containerSigns[1])+""
 	}
 	
 	switch token.(type) {
@@ -62,6 +63,9 @@ func getTokenContent(token IJsonToken)string{
 		case String:
 			str,_ := token.(String)
 			buffer = buffer +"\"" +str.stringContent +"\""
+		case Unknown:
+			str,_ := token.(Unknown)
+			buffer = buffer +" " +str.Content +" "
 	}
 	return buffer
 }
@@ -77,13 +81,30 @@ func parseToken(text string) (IJsonToken,int){
 	var buffer string = ""
 	for i < len(text) {
 		char := string(text[i])
-		
 		//container,_ :=currentToken.(*Object)
 		//fmt.Printf("At:(%v)current %v childs.\n",char,len(container.Members))
 		if char == "}" ||char == "]"{
 			fmt.Println("Token:")
 			fmt.Println(buffer)
 			fmt.Println("------------------------------------------------------------------------------------------------------------------------------------------------------------------------------")
+			unkToken := parseUnknown(buffer)
+			buffer=""
+			if unkToken.Content!=""{
+				tokenPool = append(tokenPool, unkToken)
+			}
+			if currentToken.GetTypeString()=="Object" && unkToken.Content!=""{
+				if pairAwaiting {
+					key, _ := tokenPool[len(tokenPool)-2].(String)
+					pair := Pair{Key : key, Val : tokenPool[len(tokenPool)-1] }
+					tokenPool = tokenPool[:len(tokenPool)-2]
+					container,_ :=currentToken.(*Object)
+					container.AddChild(pair)
+					pairAwaiting = false
+				}
+			}else if currentToken.GetTypeString()=="Array" && unkToken.Content!="" {
+				container,_ :=currentToken.(*Array)
+				container.AddChild(unkToken)
+			}
 			i++
 			break
 		
@@ -103,17 +124,36 @@ func parseToken(text string) (IJsonToken,int){
 				container.AddChild(pair)
 				//fmt.Println("Added pair "+key.stringContent+ " to "+currentToken.GetTypeString()+".")
 				//container,_ =currentToken.(Object)
-				
 				//fmt.Printf("current %v childs.\n",len(container.Members))
-				
 				pairAwaiting = false
-			}else{
 			}
-			buffer=buffer +"|"+innerToken.GetTypeString()+"|"
+			//buffer=buffer +"|"+innerToken.GetTypeString()+"|"
 			
 			i = i + count
 		}else if char ==":"{
 			pairAwaiting=true
+			i++
+		}else if char ==","{
+			unkToken := parseUnknown(buffer)
+			buffer=""
+			if unkToken.Content!=""{
+				tokenPool = append(tokenPool, unkToken)
+			}
+			if currentToken.GetTypeString()=="Object" && unkToken.Content!=""{
+				if pairAwaiting {
+					key, _ := tokenPool[len(tokenPool)-2].(String)
+					pair := Pair{Key : key, Val : tokenPool[len(tokenPool)-1] }
+					tokenPool = tokenPool[:len(tokenPool)-2]
+					container,_ :=currentToken.(*Object)
+					container.AddChild(pair)
+					pairAwaiting = false
+				}
+			}else if currentToken.GetTypeString()=="Array" && unkToken.Content!="" {
+				container,_ :=currentToken.(*Array)
+				container.AddChild(unkToken)
+			}
+			i++
+		}else if char == " "||char == "	"||char=="\n"{
 			i++
 		}else{
 			buffer = buffer+char
@@ -156,6 +196,10 @@ func parseString(text string) (String,int){
 		}
 	}
 	return result,i
+}
+func parseUnknown(buffer string) Unknown{
+	content := strings.TrimSpace(buffer)
+	return Unknown{Content : content}
 }
 
 type IJsonToken interface {
@@ -253,6 +297,12 @@ func (str String)GetTypeString() string {
 	return "String"
 }
 
+type Unknown struct{
+	Content string
+}
+func (unk Unknown)GetTypeString() string {
+	return "Unknown"
+}
 // type Value struct{
 // 	// Tokens IJsonToken
 // }
