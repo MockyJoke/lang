@@ -198,6 +198,7 @@ func parseString(text string) (String,int){
 	for i < len(text) {
 		char := string(text[i])
 		if char == "\\"{
+			buffer= buffer + char + string(text[i+1])
 			i+=2
 			continue
 		}else if char == "\""{
@@ -300,4 +301,12 @@ type Unknown struct{
 }
 func (unk Unknown)GetTypeString() string {
 	return "Unknown"
+}
+
+
+type IIndexAccess interface{
+	Access(i int)
+}
+func Function(obj IIndexAccess){
+	
 }
