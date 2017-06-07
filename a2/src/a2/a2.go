@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
+	"html"
 )
 
 func main(){
@@ -64,7 +65,7 @@ func getTokenHtml(token IJsonToken, depth int)string{
 		for i,ele := range childs{
 			buffer =buffer+ getTokenHtml(ele,depth+1)
 			if i<len(childs)-1{
-				buffer +=","
+				buffer +=getHtmlTag(",","orange")
 			}
 			buffer +="\n"
 		}
@@ -75,13 +76,18 @@ func getTokenHtml(token IJsonToken, depth int)string{
 	switch token.(type) {
 		case Pair:
 			pair,_ := token.(Pair)
-			buffer = buffer +indent+"\""+pair.Key.stringContent +"\" : " +strings.TrimLeft(getTokenHtml(pair.Val, depth+1),indentChar)
+			buffer = buffer +indent+"\""+pair.Key.stringContent +"\" "+getHtmlTag(":","DarkGreen")+" " +strings.TrimLeft(getTokenHtml(pair.Val, depth+1),indentChar)
 		case String:
 			str,_ := token.(String)
-			buffer = buffer+indent+"\"" +str.stringContent +"\""
+			buffer = buffer+indent+"\"" +html.EscapeString(str.stringContent) +"\""
 		case Unknown:
 			str,_ := token.(Unknown)
-			buffer = buffer + indent +" " +str.Content +" "
+			unknownColor:= "DarkOrchid"
+			if str.Content == "true" || str.Content =="false"|| str.Content=="null"{
+				unknownColor = "GoldenRod"
+			}
+			
+			buffer = buffer + indent +" " +getHtmlTag(str.Content, unknownColor) +" "
 	}
 	return buffer
 }
@@ -164,7 +170,9 @@ func parseToken(text string) (IJsonToken,int){
 	for i < len(text) {
 		char := string(text[i])
 		if char == "}" ||char == "]"{
-			parseUnknown(buffer, tokenPool, currentToken)
+			parseUnknown(buffer, &tokenPool, currentToken)
+			buffer=""
+			pairAwaiting=false
 			i++
 			break
 		
@@ -188,8 +196,9 @@ func parseToken(text string) (IJsonToken,int){
 			pairAwaiting=true
 			i++
 		}else if char ==","{
-			parseUnknown( buffer,tokenPool, currentToken)
-			
+			parseUnknown( buffer,&tokenPool, currentToken)
+			buffer=""
+			pairAwaiting=false
 			i++
 		}else if char == " "||char == "	"||char=="\n"{
 			i++
@@ -235,32 +244,39 @@ func parseString(text string) (String,int){
 	}
 	return result,i
 }
-
-func parseUnknown(buffer string, tokenPool []IJsonToken, currentToken IJsonToken){
+func debugTokenPool(tokenPool []IJsonToken){
+	fmt.Printf("TokenPool has %v items.\n",len(tokenPool))
+	if len(tokenPool)>=1{
+		fmt.Printf("Top is %v\n",tokenPool[len(tokenPool)-1].GetTypeString())
+	}
+}
+func parseUnknown(buffer string, tokenPool *[]IJsonToken, currentToken IJsonToken){
 	content := strings.TrimSpace(buffer)
 	if content==""{
 		return
 	}
 	unkToken := Unknown{Content : content}
-	tokenPool = append(tokenPool, unkToken)
+	*tokenPool = append(*tokenPool, unkToken)
 	if currentToken.GetTypeString()=="Object"{
-	key, _ := tokenPool[len(tokenPool)-2].(String)
-	pair := Pair{Key : key, Val : tokenPool[len(tokenPool)-1] }
-	tokenPool = tokenPool[:len(tokenPool)-2]
-	container,_ :=currentToken.(*Object)
-	container.AddChild(pair)
+		//debugTokenPool(*tokenPool)
+		key, _ := (*tokenPool)[len(*tokenPool)-2].(String)
+		pair := Pair{Key : key, Val : unkToken }
+		//*tokenPool = (*tokenPool)[:len(*tokenPool)-2]
+		container,_ :=currentToken.(*Object)
+		container.AddChild(pair)
+		
 
 	}else if currentToken.GetTypeString()=="Array" {
 		container,_ :=currentToken.(*Array)
 		container.AddChild(unkToken)
 	}
-	buffer=""
 	return
 }
 
 
 type IJsonToken interface {
 	GetTypeString() string
+	GetContent() string
 }
 
 type IContainer interface{
@@ -285,6 +301,9 @@ func (obj *Object)AddChild(child IJsonToken){
 func (obj *Object)GetTypeString() string {
 	return "Object"
 }
+func (obj *Object)GetContent() string {
+	return fmt.Sprintf("Object with %v items, last:%v",len(obj.Members),obj.Members[len(obj.Members)-1].GetContent())
+}
 func (obj *Object)GetChilds() []IJsonToken{
 	return obj.Members
 }
@@ -297,6 +316,9 @@ func (arr *Array)AddChild(child IJsonToken){
 }
 func (arr *Array)GetTypeString() string {
 	return "Array"
+}
+func (arr *Array)GetContent() string {
+	return fmt.Sprintf("Array with %v items",len(arr.Elements))
 }
 func (arr *Array)GetChilds() []IJsonToken{
 	return arr.Elements
@@ -312,6 +334,9 @@ func (pair Pair)AddChild(child IJsonToken){
 func (pair Pair)GetTypeString() string {
 	return "Pair"
 }
+func (pair Pair)GetContent() string {
+	return fmt.Sprintf("Pair, key: %v value: %v",pair.Key.GetContent(),pair.Val.GetContent())
+}
 
 type String struct{
 	stringContent string
@@ -319,11 +344,17 @@ type String struct{
 func (str String)GetTypeString() string {
 	return "String"
 }
+func (str String) GetContent() string {
+	return fmt.Sprintf("String:%v",str.stringContent)
+}
 
 type Unknown struct{
 	Content string
 }
 func (unk Unknown)GetTypeString() string {
-	return "Unknown"
+	return "Unknown:"
+}
+func (unk Unknown) GetContent() string {
+	return fmt.Sprintf("Unknown:%v",unk.Content)
 }
 
