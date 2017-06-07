@@ -23,7 +23,7 @@
         }
     },
     "a < b && a >= c": true,
-    "htmlEncode":"231<hahahah<haha>>",
+    "htmlEncode":"231><hahahah<haha>>",
     "escape":"This field has escape characters like \n and \u4234."
     
 }
