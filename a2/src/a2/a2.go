@@ -30,6 +30,7 @@ func parseJson(filename string) IJsonToken {
     }
 	jsonString := string(content)
 	if len(jsonString)==0{
+		fmt.Println("Error. Supplied file is empty.")
 		return &Object{}
 	}
 	token, _ := parseToken(jsonString)
@@ -76,10 +77,10 @@ func getTokenHtml(token IJsonToken, depth int)string{
 	switch token.(type) {
 		case Pair:
 			pair,_ := token.(Pair)
-			buffer = buffer +indent+"\""+pair.Key.stringContent +"\" "+getHtmlTag(":","DarkGreen")+" " +strings.TrimLeft(getTokenHtml(pair.Val, depth+1),indentChar)
+			buffer = buffer +indent+"\""+getHtmlTag(getStringHtml(html.EscapeString(pair.Key.stringContent)),"SteelBlue") +"\" "+getHtmlTag(":","DarkGreen")+" " +strings.TrimLeft(getTokenHtml(pair.Val, depth+1),indentChar)
 		case String:
 			str,_ := token.(String)
-			buffer = buffer+indent+"\"" +getHtmlTag(html.EscapeString(str.stringContent),"IndianRed") +"\""
+			buffer = buffer+indent+"\"" +getHtmlTag(getStringHtml(html.EscapeString(str.stringContent)),"IndianRed") +"\""
 		case Unknown:
 			str,_ := token.(Unknown)
 			unknownColor:= "DarkOrchid"
@@ -88,6 +89,26 @@ func getTokenHtml(token IJsonToken, depth int)string{
 			}
 			
 			buffer = buffer + indent +"" +getHtmlTag(str.Content, unknownColor) +""
+	}
+	return buffer
+}
+func getStringHtml(str string) string {
+	buffer := ""
+	i := 0
+	for i < len(str) {
+		char := string (str[i])
+		if char == "\\"{
+			if string (str[i+1])=="u"{
+				buffer = buffer + getHtmlTag(string(str[i:i+6]),"LightSeaGreen")
+				i = i + 6
+			}else{
+				buffer = buffer + getHtmlTag(string(str[i:i+2]),"MediumBlue")
+				i = i + 2
+			}
+		}else{
+			buffer = buffer + char
+			i = i + 1
+		}
 	}
 	return buffer
 }
