@@ -12,28 +12,32 @@ func main(){
 	if fileName==""{
 		fmt.Print("No proper input json supplied.")
 	}
-	fmt.Println(parseJson(fileName))
+	rootJsonToken := parseJson(fileName)
+	//json := getTokenContent(rootJsonToken,0)
+	html := getTokenHtml(rootJsonToken, 0)
+	//fmt.Println(json)
+	fmt.Println(getFinalHtml("template.html",html))
+	
 }
 
-func parseJson(filename string) string {
+func parseJson(filename string) IJsonToken {
 	filename = strings.TrimSpace(filename)
 	content, err := ioutil.ReadFile(filename) // read the file
 	if err != nil {
         fmt.Println(err)
-		return "Error, unable to read file"
+		return &Object{}
     }
 	jsonString := string(content)
 	if len(jsonString)==0{
-		return ""
+		return &Object{}
 	}
 	token, _ := parseToken(jsonString)
-	json := getTokenContent(token,0)
-	//json := getTokenHtml(token, 0)
-	return json
+	return token
+
 }
 
 func getTokenHtml(token IJsonToken, depth int)string{
-var indentChar =" "
+	var indentChar =" "
 	var indent string =""
 	var endingIndent = ""
 	i := 0
@@ -46,31 +50,32 @@ var indentChar =" "
 		endingIndent += indentChar
 		i++
 	}
-	
 	var buffer string = ""
 	container,ok := token.(IContainer)
 	if ok{
 		childs := container.GetChilds()
 		containerSigns := "{}"
+		containerColor := "red"
 		if(token.GetTypeString()=="Array"){
 			containerSigns="[]"
+			containerColor = "blue"
 		}
-		buffer =buffer +string(containerSigns[0])+"\n"
+		buffer =buffer +getHtmlTag(string(containerSigns[0]),containerColor)+"\n"
 		for i,ele := range childs{
-			buffer =buffer+ getTokenContent(ele,depth+1)
+			buffer =buffer+ getTokenHtml(ele,depth+1)
 			if i<len(childs)-1{
 				buffer +=","
 			}
 			buffer +="\n"
 		}
-		buffer =buffer +endingIndent+string(containerSigns[1])+""
+		buffer =buffer +endingIndent+getHtmlTag(string(containerSigns[1]),containerColor)+""
 		return buffer
 	}
 	
 	switch token.(type) {
 		case Pair:
 			pair,_ := token.(Pair)
-			buffer = buffer +indent+"\""+pair.Key.stringContent +"\":" +strings.TrimLeft(getTokenContent(pair.Val, depth+1),indentChar)
+			buffer = buffer +indent+"\""+pair.Key.stringContent +"\" : " +strings.TrimLeft(getTokenHtml(pair.Val, depth+1),indentChar)
 		case String:
 			str,_ := token.(String)
 			buffer = buffer+indent+"\"" +str.stringContent +"\""
@@ -80,6 +85,24 @@ var indentChar =" "
 	}
 	return buffer
 }
+
+func getHtmlTag(content string,color string) string{
+	//color := "red"
+	start := fmt.Sprintf("<span style=\"color:%v\">",color)
+	mid := content
+	end := fmt.Sprintf("</span>")
+	return start+mid+end
+}
+func getFinalHtml(templateFilename string, codeHtml string) string{
+	templateFilename = strings.TrimSpace(templateFilename)
+	content, err := ioutil.ReadFile(templateFilename) // read the file
+	if err != nil {
+        fmt.Println(err)
+		return "Cannot open html template"
+    }
+	return fmt.Sprintf(string(content),codeHtml)
+}
+
 func getTokenContent(token IJsonToken,depth int)string{
 	var indentChar =" "
 	var indent string =""
@@ -235,6 +258,7 @@ func parseUnknown(buffer string, tokenPool []IJsonToken, currentToken IJsonToken
 	return
 }
 
+
 type IJsonToken interface {
 	GetTypeString() string
 }
@@ -303,10 +327,3 @@ func (unk Unknown)GetTypeString() string {
 	return "Unknown"
 }
 
-
-type IIndexAccess interface{
-	Access(i int)
-}
-func Function(obj IIndexAccess){
-	
-}
