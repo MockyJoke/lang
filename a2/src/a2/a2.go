@@ -79,7 +79,7 @@ func getTokenHtml(token IJsonToken, depth int)string{
 			buffer = buffer +indent+"\""+pair.Key.stringContent +"\" "+getHtmlTag(":","DarkGreen")+" " +strings.TrimLeft(getTokenHtml(pair.Val, depth+1),indentChar)
 		case String:
 			str,_ := token.(String)
-			buffer = buffer+indent+"\"" +html.EscapeString(str.stringContent) +"\""
+			buffer = buffer+indent+"\"" +getHtmlTag(html.EscapeString(str.stringContent),"IndianRed") +"\""
 		case Unknown:
 			str,_ := token.(Unknown)
 			unknownColor:= "DarkOrchid"
@@ -87,7 +87,7 @@ func getTokenHtml(token IJsonToken, depth int)string{
 				unknownColor = "GoldenRod"
 			}
 			
-			buffer = buffer + indent +" " +getHtmlTag(str.Content, unknownColor) +" "
+			buffer = buffer + indent +"" +getHtmlTag(str.Content, unknownColor) +""
 	}
 	return buffer
 }
