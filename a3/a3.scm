@@ -1,3 +1,4 @@
+;; Q1
 (define my-last
     (lambda (lst)
         (cond
@@ -8,12 +9,14 @@
     )
 )
 
+;; Q2
 (define snoc
     (lambda (x lst)
         (append lst (list x))
     )
 )
 
+;; Q3
 (define range
     (lambda (n)
         (cond
@@ -23,6 +26,7 @@
     )
 )
 
+;; Q4
 (define deep-sum
     (lambda (lst)
         (cond
@@ -42,6 +46,7 @@
     )
 )
 
+;; Q5
 (define count-primes
     (lambda (n)
         (cond
@@ -66,6 +71,7 @@
     )
 )
 
+;; Q6
 (define is-prime-helper?
     (lambda (n i)
         (cond
@@ -79,6 +85,7 @@
     )
 )
 
+;; Q7
 (define is-bit?
     (lambda (x)
         (cond
@@ -109,6 +116,7 @@
 )
 
 
+;; Q8
 (define all-bit-seqs
     (lambda (n)
         (cond
