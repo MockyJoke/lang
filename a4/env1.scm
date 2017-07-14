@@ -32,22 +32,15 @@
 
 (define extend-env 
     (lambda (v val env)
-        (display "abc")
         (cond
             ((null? env)
-                (begin (display "1")
-                    (list (list v val))
-                )
+                (list (list v val))
             )
             ((equal? (car (car env)) v)
-                (begin (display "2")
-                    (list (list v val) (cdr env))
-                )
+                (cons (list v val) (cdr env))
             )
             (else
-                (begin (display "3")
-                    (cons (car env) (extend-env v val(cdr env)))
-                )
+                (cons (car env) (extend-env v val(cdr env)))
             )
         )
     )
@@ -55,7 +48,7 @@
 
 ;;(define k (extend-env 'a 1 (make-empty-env)))
 
-#| 
+#|
 (define test-env
     (extend-env 'a 1
         (extend-env 'b 2
@@ -64,4 +57,3 @@
                     (make-empty-env)))))
 )
 |#
-
