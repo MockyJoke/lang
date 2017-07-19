@@ -8,7 +8,7 @@
 (define apply-env 
     (lambda (env v)
         (cond
-             ((null? env) (error "apply-env: empty environment"))
+             ((null? env) (error "apply-env: empty environment or variable not in environment"))
              ((equal? (car (car env)) v)
                 (car (cdr (car env)))
              )
@@ -46,7 +46,7 @@
     )
 )
 
-;;(define k (extend-env 'a 1 (make-empty-env)))
+(define k (extend-env 'a 1 (make-empty-env)))
 
 #| 
 (define test-env
