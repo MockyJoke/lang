@@ -70,6 +70,9 @@
                                 ((and (equal? center '-) (equal? left right))
                                     0
                                 )
+                                ((and (equal? center '/) (equal? right 0))
+                                    (error "Cannot devide by 0.")
+                                )
                                 ((and (number? left) (number? right))
                                     ((operator center) left right)
                                 )

@@ -51,20 +51,6 @@
     )
 )
 
-(define first car)
-
-(define second
-    (lambda (x)
-        (car (cdr x))
-    )
-)
-
-(define third
-    (lambda (x)
-        (car (cdr (cdr x)))
-    )
-)
-
 (define operator
     (lambda (e)
         (cond
