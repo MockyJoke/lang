@@ -32,9 +32,9 @@
                             )
                         )
                     )
-                )
-                (else
-                    (error "Unsupported expression.")
+                    (else
+                        (error "Unsupported expression.")
+                    )
                 )
             )
             (else
