@@ -26,3 +26,11 @@
         )
     )
 )
+
+(define test-env
+    (extend-env 'a 1
+        (extend-env 'b 2
+            (extend-env 'c 3
+                (extend-env 'b 4
+                    (make-empty-env)))))
+)

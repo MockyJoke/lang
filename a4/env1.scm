@@ -18,18 +18,6 @@
 )
 
 
-(define has-env
-    (lambda (env v)
-        (cond
-             ((null? env) #f)
-             ((equal? (car (car env) v))
-                #t
-             )
-             (else (has-env (cdr env) v))
-        )
-    )
-)
-
 (define extend-env 
     (lambda (v val env)
         (cond
@@ -37,7 +25,7 @@
                 (list (list v val))
             )
             ((equal? (car (car env)) v)
-                (list (list v val) (cdr env))
+                (cons (list v val) (cdr env))
             )
             (else
                 (cons (car env) (extend-env v val(cdr env)))
@@ -45,10 +33,15 @@
         )
     )
 )
-
-(define k (extend-env 'a 1 (make-empty-env)))
-
-#| 
+#|
+(define t1
+    (extend-env 'a 5
+        (extend-env 'b 4
+            (extend-env 'c 3
+                (extend-env 'b 4
+                    (make-empty-env)))))
+)
+|#
 (define test-env
     (extend-env 'a 1
         (extend-env 'b 2
@@ -56,5 +49,3 @@
                 (extend-env 'b 4
                     (make-empty-env)))))
 )
-|#
-
