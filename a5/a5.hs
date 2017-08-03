@@ -176,5 +176,5 @@ listFilter f (Cons x (xs)) y =  if (f x y) then Cons x (listFilter f xs y) else 
 
 sort :: Ord a => List a -> List a
 sort Empty = Empty
-sort (Cons x (xs)) = append (sort (listFilter (<) xs x)) (Cons x (sort (listFilter (>) xs x)))
+sort (Cons x (xs)) = append (sort (listFilter (<=) xs x)) (Cons x (sort (listFilter (>) xs x)))
 
