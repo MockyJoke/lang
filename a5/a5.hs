@@ -115,11 +115,66 @@ invert [] = []
 invert lst = flipBit (head lst) : invert (tail lst)
 
 
-
+-- 15
 all_bit_seqs :: (Integral a) => a -> [[Bit]]
 all_bit_seqs n
     | n < 1 = []
     -- I came up with this solution based on getting binary digit by continuous division.
     | otherwise = [ [ if ((x `quot` (2^q)) `mod` 2) == 0 then Zero else One | q<-[n-1,n-2..0]]  | x <- [0..2^n-1]]
     
--- [mod (quot x (2^q)) 2 | q<-[n-1,n-2..0]]
+
+-- 16
+bitSum1 :: [Bit] -> Int
+bitSum1 [] = 0
+bitSum1 (x:xs) = (if x == One then 1 else 0) + bitSum1(xs)
+
+
+-- 17
+bitSum2 :: [Maybe Bit] -> Int
+bitSum2 [] = 0
+bitSum2 (Nothing:xs) = bitSum2 xs
+bitSum2 ((Just x):xs) = (if x == One then 1 else 0) + bitSum2(xs)
+
+
+
+data List a = Empty | Cons a (List a)
+    deriving Show
+
+
+-- 18
+toList :: [a] -> List a
+toList [] = Empty
+toList (x:xs) = Cons x (toList xs)
+
+
+-- 19
+toHaskellList :: List a -> [a]
+toHaskellList Empty = []
+toHaskellList (Cons x (xs)) = x:(toHaskellList xs)
+
+
+-- 20
+append :: List a -> List a -> List a
+append Empty y = y
+append (Cons x (xs)) y = Cons x (append xs y)
+
+
+-- 21
+removeAll :: (a -> Bool) -> List a -> List a
+removeAll f Empty = Empty
+removeAll f (Cons x (xs)) = if (f x) then removeAll f xs else Cons x (removeAll f xs)
+
+
+-- 22
+-- I got the idea of implementing quick sort in haskell for list from
+-- https://smthngsmwhr.wordpress.com/2012/11/09/sorting-algorithms-in-haskell/
+-- Helper for fitering custom defined List
+listFilter :: Ord a => (a -> a -> Bool) -> List a -> a -> List a
+listFilter f Empty y = Empty
+listFilter f (Cons x (xs)) y =  if (f x y) then Cons x (listFilter f xs y) else listFilter f xs y
+
+
+sort :: Ord a => List a -> List a
+sort Empty = Empty
+sort (Cons x (xs)) = append (sort (listFilter (<) xs x)) (Cons x (sort (listFilter (>) xs x)))
+
